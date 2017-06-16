@@ -1,6 +1,6 @@
 import { existsSync, readFile, stat } from 'fs';
 import { join, relative } from 'path';
-import { gzip } from 'zlib';
+import { sync: gzipSize } from 'gzip-size';
 
 import Promise, { promisify, resolve } from 'bluebird';
 import { green, grey, stripColor, yellow } from 'chalk';
@@ -11,7 +11,7 @@ import rimraf from 'rimraf';
 import symlinkOrCopy from 'symlink-or-copy';
 import walk from 'walk';
 
-const [preadFile, pstat, pgzip] = [readFile, stat, gzip].map(promisify);
+const [preadFile, pstat, pgzip, pgzipSize] = [readFile, stat, gzip, gzipSize].map(promisify);
 
 /**
  * Lists files of a directory recursively. Follows symbolic links.
@@ -118,7 +118,7 @@ export default class FileSizePlugin extends Plugin {
 
     // Otherwise, reads the file contents and calculate gzipped size
     return preadFile(absolutePath)
-      .then(contents => [contents, pgzip(contents)])
+      .then(contents => [contents, pgzipSize(contents)])
       .then(buffers => buffers.map(buffer => buffer.toString().length));
   }
 
